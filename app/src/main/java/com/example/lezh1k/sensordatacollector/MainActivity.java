@@ -200,12 +200,12 @@ public class MainActivity extends AppCompatActivity implements LocationServiceIn
                 KalmanLocationService.Settings settings =
                         new KalmanLocationService.Settings(
                                 Utils.ACCELEROMETER_DEFAULT_DEVIATION,
-                                Integer.parseInt(mSharedPref.getString("pref_gps_min_distance", "")),
-                                Integer.parseInt(mSharedPref.getString("pref_gps_min_time", "")),
-                                Integer.parseInt(mSharedPref.getString("pref_position_min_time", "")),
-                                Integer.parseInt(mSharedPref.getString("pref_geohash_precision", "")),
-                                Integer.parseInt(mSharedPref.getString("pref_geohash_min_point", "")),
-                                Double.parseDouble(mSharedPref.getString("pref_sensor_frequency", "")),
+                                Integer.parseInt(mSharedPref.getString("pref_gps_min_distance", "0")),
+                                Integer.parseInt(mSharedPref.getString("pref_gps_min_time", "1000")),
+                                Integer.parseInt(mSharedPref.getString("pref_position_min_time", "500")),
+                                Integer.parseInt(mSharedPref.getString("pref_geohash_precision", "6")),
+                                Integer.parseInt(mSharedPref.getString("pref_geohash_min_point", "2")),
+                                Double.parseDouble(mSharedPref.getString("pref_sensor_frequency", "10")),
                                 this,
                                 false,
                                 Utils.DEFAULT_VEL_FACTOR,
