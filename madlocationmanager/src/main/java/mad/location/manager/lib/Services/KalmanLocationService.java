@@ -124,12 +124,26 @@ public class KalmanLocationService extends Service
         if (m_locationServiceInterfaces.addAll(locationServiceInterfaces) && m_lastLocation != null) {
             for (LocationServiceInterface locationServiceInterface : locationServiceInterfaces) {
                 locationServiceInterface.locationChanged(m_lastLocation);
+    public void addSensorInterface(SensorInterface sensorInterface) {
+        if (m_sensorInterfaces.add(sensorInterface)) {
+            sensorInterface.courseChanged(azimut);
+        }
+    }
+
+    public void addSensorInterfaces(List<SensorInterface> sensorInterfaces) {
+        if (m_sensorInterfaces.addAll(sensorInterfaces)) {
+            for (SensorInterface sensorInterface : sensorInterfaces) {
+                sensorInterface.courseChanged(azimut);
             }
         }
     }
 
     public void removeInterface(LocationServiceInterface locationServiceInterface) {
         m_locationServiceInterfaces.remove(locationServiceInterface);
+    }
+
+    public void removeSensorInterface(SensorInterface sensorInterface) {
+        m_sensorInterfaces.remove(sensorInterface);
     }
 
     public void removeStatusInterface(LocationServiceStatusInterface locationServiceStatusInterface) {
@@ -179,12 +193,14 @@ public class KalmanLocationService extends Service
         stop();
         Log.d(TAG, "onTaskRemoved: " + rootIntent);
         m_locationServiceInterfaces.clear();
+        m_sensorInterfaces.clear();
         m_locationServiceStatusInterfaces.clear();
         stopSelf();
     }
     //endregion
 
     private GeohashRTFilter m_geoHashRTFilter = null;
+
     public GeohashRTFilter getGeoHashRTFilter() {
         return m_geoHashRTFilter;
     }
@@ -386,6 +402,7 @@ public class KalmanLocationService extends Service
     public KalmanLocationService() {
         m_locationServiceInterfaces = new ArrayList<>();
         m_locationServiceStatusInterfaces = new ArrayList<>();
+        m_sensorInterfaces = new ArrayList<>();
         m_lstSensors = new ArrayList<Sensor>();
         m_eventLoopTask = null;
         reset(defaultSettings);
@@ -534,10 +551,24 @@ public class KalmanLocationService extends Service
                         m_magneticDeclination);
                 m_sensorDataQueue.add(sdi);
                 break;
-            case Sensor.TYPE_ROTATION_VECTOR:
+            }
+            case Sensor.TYPE_ROTATION_VECTOR: {
                 SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values);
                 android.opengl.Matrix.invertM(rotationMatrixInv, 0, rotationMatrix, 0);
-                break;
+                float orientation[] = new float[3];
+                SensorManager.getOrientation(rotationMatrix, orientation);
+                azimut = (int) Math.round(Math.toDegrees(orientation[0]));
+                if (azimut < 0)  {
+                    azimut += 360;
+                }
+                for (SensorInterface sensorInterface : m_sensorInterfaces) {
+                    sensorInterface.courseChanged(azimut);
+                }
+//                String logStr = String.format("azimut: %d", azimut);
+//                log2File(logStr);
+            }
+            break;
+
         }
     }
 
@@ -556,7 +587,7 @@ public class KalmanLocationService extends Service
         double x, y, xVel, yVel, posDev, course, speed;
         long timeStamp;
         speed = loc.getSpeed();
-        course = loc.getBearing();
+        course = azimut;
         x = loc.getLongitude();
         y = loc.getLatitude();
         xVel = speed * Math.cos(course);

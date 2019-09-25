@@ -39,6 +39,7 @@ import com.elvishew.xlog.printer.file.naming.FileNameGenerator;
 import mad.location.manager.lib.Commons.Utils;
 import mad.location.manager.lib.Interfaces.ILogger;
 import mad.location.manager.lib.Interfaces.LocationServiceInterface;
+import mad.location.manager.lib.Interfaces.SensorInterface;
 import mad.location.manager.lib.Loggers.GeohashRTFilter;
 import mad.location.manager.lib.SensorAux.SensorCalibrator;
 import mad.location.manager.lib.Services.KalmanLocationService;
@@ -62,12 +63,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
-public class MainActivity extends AppCompatActivity implements LocationServiceInterface, MapInterface, ILogger {
+public class MainActivity extends AppCompatActivity implements LocationServiceInterface, MapInterface, ILogger, SensorInterface {
 
     private SharedPreferences mSharedPref;
 
     private String xLogFolderPath;
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+
+
     class ChangableFileNameGenerator implements FileNameGenerator {
         private String fileName;
         public void setFileName(String fileName) {
@@ -334,6 +337,13 @@ public class MainActivity extends AppCompatActivity implements LocationServiceIn
         }
     }
 
+
+    @Override
+    public void courseChanged(float course) {
+        TextView courseStatus = (TextView) findViewById(R.id.courseStatus);
+        courseStatus.setText(String.format("%.0f˚",course));
+//        m_presenter.courseChanged(course, m_map.getCameraPosition());
+    }
     public static final int FILTER_KALMAN_ONLY = 0;
     public static final int FILTER_KALMAN_WITH_GEO = 1;
     public static final int GPS_ONLY = 2;
@@ -377,6 +387,16 @@ public class MainActivity extends AppCompatActivity implements LocationServiceIn
     }
 
     @Override
+    public void setCamera(CameraPosition position) {
+        runOnUiThread(() ->
+                m_mapView.postDelayed(() -> {
+                    if (m_map != null) {
+                        m_map.animateCamera(CameraUpdateFactory.newCameraPosition(position), 0);
+                    }
+                }, 0));
+    }
+
+    @Override
     public void setAllGesturesEnabled(boolean enabled) {
         if (enabled) {
             m_mapView.postDelayed(() -> {
@@ -414,11 +434,12 @@ public class MainActivity extends AppCompatActivity implements LocationServiceIn
                     m_map.getUiSettings().setTiltGesturesEnabled(false);
 
                     int leftMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16, getResources().getDisplayMetrics());
-                    int topMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 56, getResources().getDisplayMetrics());
+                    int topMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, getResources().getDisplayMetrics());
                     int rightMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16, getResources().getDisplayMetrics());
                     int bottomMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16, getResources().getDisplayMetrics());
                     m_map.getUiSettings().setCompassMargins(leftMargin, topMargin, rightMargin, bottomMargin);
                     ServicesHelper.addLocationServiceInterface(this_);
+                    ServicesHelper.addSensorInterface(this_);
                     m_presenter.getRoute();
                     progress.dismiss();
                 }
