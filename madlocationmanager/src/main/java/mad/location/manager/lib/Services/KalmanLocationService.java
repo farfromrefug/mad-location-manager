@@ -269,6 +269,7 @@ public class KalmanLocationService extends Service
         boolean needTerminate = false;
         long deltaTMs;
         KalmanLocationService owner;
+
         SensorDataEventLoopTask(long deltaTMs, KalmanLocationService owner) {
             this.deltaTMs = deltaTMs;
             this.owner = owner;
@@ -284,8 +285,11 @@ public class KalmanLocationService extends Service
         }
 
         private void handleUpdate(SensorGpsDataItem sdi) {
-            double xVel = sdi.getSpeed() * Math.cos(sdi.getCourse());
-            double yVel = sdi.getSpeed() * Math.sin(sdi.getCourse());
+            double speed = sdi.getSpeed();
+
+
+            double xVel = speed * Math.cos(sdi.getCourse());
+            double yVel = speed * Math.sin(sdi.getCourse());
 //            log2File("%d%d KalmanUpdate : pos lon=%f, lat=%f, xVel=%f, yVel=%f, posErr=%f, velErr=%f",
 //                    Utils.LogMessageType.KALMAN_UPDATE.ordinal(),
 //                    (long) sdi.getTimestamp(),
@@ -322,7 +326,7 @@ public class KalmanLocationService extends Service
             loc.setBearing((float)sdi.getCourse());
             loc.setSpeed((float) speed);
             loc.setTime(System.currentTimeMillis());
-            loc.setElapsedRealtimeNanos(System.nanoTime());
+            loc.setElapsedRealtimeNanos(Utils.milli2nano(sdi.getTimestamp()));
             loc.setAccuracy((float) sdi.getPosErr());
 
             if (m_geoHashRTFilter != null) {
@@ -414,6 +418,7 @@ public class KalmanLocationService extends Service
         reset(defaultSettings);
     }
 
+    @SuppressLint("InvalidWakeLockTag")
     @Override
     public void onCreate() {
         super.onCreate();
@@ -453,7 +458,7 @@ public class KalmanLocationService extends Service
             m_locationManager.addGpsStatusListener(this);
             m_locationManager.removeUpdates(this);
             m_locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-                    m_settings.gpsMinTime, m_settings.gpsMinDistance, this );
+                    m_settings.gpsMinTime, m_settings.gpsMinDistance, this);
         }
 
         m_sensorsEnabled = true;
@@ -520,6 +525,8 @@ public class KalmanLocationService extends Service
         }
     }
 
+    int azimut = 0;
+
     /*SensorEventListener methods implementation*/
     @Override
     public void onSensorChanged(SensorEvent event) {
@@ -530,7 +537,7 @@ public class KalmanLocationService extends Service
         long now = android.os.SystemClock.elapsedRealtimeNanos();
         long nowMs = Utils.nano2milli(now);
         switch (event.sensor.getType()) {
-            case Sensor.TYPE_LINEAR_ACCELERATION:
+            case Sensor.TYPE_LINEAR_ACCELERATION: {
                 System.arraycopy(event.values, 0, linearAcceleration, 0, event.values.length);
                 android.opengl.Matrix.multiplyMV(absAcceleration, 0, rotationMatrixInv,
                         0, linearAcceleration, 0);
@@ -592,8 +599,21 @@ public class KalmanLocationService extends Service
         if (m_settings.filterMockGpsCoordinates && loc.isFromMockProvider()) return;
 
         double x, y, xVel, yVel, posDev, course, speed;
+        if (m_lastLocation != null && m_lastLocation.getLatitude() == loc.getLatitude() && m_lastLocation.getLongitude() == loc.getLongitude() && m_lastLocation.getSpeed() == loc.getSpeed() && m_lastLocation.getBearing() == loc.getBearing()) {
+            return;
+        }
         long timeStamp = Utils.nano2milli(loc.getElapsedRealtimeNanos());
         speed = loc.getSpeed();
+        boolean isMock = loc.isFromMockProvider();
+//        if (m_lastLocation != null && speed == 0) {
+//            double dd = Coordinates.distanceBetween(
+//                    m_lastLocation.getLatitude(), m_lastLocation.getLongitude(),
+//                    loc.getLatitude(), loc.getLongitude());
+//            double dt = Math.abs(timeStamp - Utils.nano2milli(m_lastLocation.getElapsedRealtimeNanos()));
+//            speed = dd / dt * 1000 / 3.6;
+//            String logStr = String.format("computed speed: %f", speed);
+//            log2File(logStr);
+//        }
         course = azimut;
         x = loc.getLongitude();
         y = loc.getLatitude();
@@ -641,9 +661,9 @@ public class KalmanLocationService extends Service
                 SensorGpsDataItem.NOT_INITIALIZED,
                 SensorGpsDataItem.NOT_INITIALIZED,
                 SensorGpsDataItem.NOT_INITIALIZED,
-                loc.getSpeed(),
-                loc.getBearing(),
-                loc.getAccuracy(),
+                speed,
+                course,
+                posDev,
                 velErr,
                 m_magneticDeclination);
         m_sensorDataQueue.add(sdi);
