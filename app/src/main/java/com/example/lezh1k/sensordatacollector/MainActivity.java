@@ -435,7 +435,7 @@ public class MainActivity extends AppCompatActivity implements LocationServiceIn
             progress.show();
 
             m_map.setStyleUrl(BuildConfig.lightMapStyle);
-            m_map.setStyleUrl(Style.SATELLITE_STREETS, new MapboxMap.OnStyleLoadedListener() {
+            m_map.setStyleUrl(Style.MAPBOX_STREETS, new MapboxMap.OnStyleLoadedListener() {
                 @Override
                 public void onStyleLoaded(String style) {
                     m_map.getUiSettings().setLogoEnabled(false);
