@@ -118,14 +118,18 @@ public class KalmanLocationService extends Service
 
     public void addInterface(LocationServiceInterface locationServiceInterface) {
         if (m_locationServiceInterfaces.add(locationServiceInterface) && m_lastLocation != null) {
-            locationServiceInterface.locationChanged(m_lastLocation);
+            locationServiceInterface.locationChanged(m_lastLocation, 0);
         }
     }
 
     public void addInterfaces(List<LocationServiceInterface> locationServiceInterfaces) {
         if (m_locationServiceInterfaces.addAll(locationServiceInterfaces) && m_lastLocation != null) {
             for (LocationServiceInterface locationServiceInterface : locationServiceInterfaces) {
-                locationServiceInterface.locationChanged(m_lastLocation);
+                locationServiceInterface.locationChanged(m_lastLocation, 0);
+            }
+        }
+    }
+
     public void addSensorInterface(SensorInterface sensorInterface) {
         if (m_sensorInterfaces.add(sensorInterface)) {
             sensorInterface.courseChanged(azimut);
@@ -353,7 +357,7 @@ public class KalmanLocationService extends Service
                     } else {
                         handleUpdate(sdi);
                         Location loc = locationAfterUpdateStep(sdi);
-                        publishProgress(loc);
+                        publishProgress(loc, new Double(sdi.getSpeed()));
                     }
                 }
             }
@@ -362,10 +366,10 @@ public class KalmanLocationService extends Service
 
         @Override
         protected void onProgressUpdate(Object... values) {
-            onLocationChangedImp((Location) values[0]);
+            onLocationChangedImp((Location) values[0], ((Double) values[1]).floatValue());
         }
 
-        void onLocationChangedImp(Location location) {
+        void onLocationChangedImp(Location location, float originalSpeed) {
             if (location == null || location.getLatitude() == 0 ||
                     location.getLongitude() == 0 ||
                     !location.getProvider().equals(TAG)) {
@@ -390,7 +394,7 @@ public class KalmanLocationService extends Service
             }
 
             for (LocationServiceInterface locationServiceInterface : m_locationServiceInterfaces) {
-                locationServiceInterface.locationChanged(location);
+                locationServiceInterface.locationChanged(location, originalSpeed);
             }
             for (LocationServiceStatusInterface locationServiceStatusInterface : m_locationServiceStatusInterfaces) {
                 locationServiceStatusInterface.serviceStatusChanged(m_serviceStatus);
@@ -486,6 +490,7 @@ public class KalmanLocationService extends Service
             m_geoHashRTFilter.stop();
         }
 
+        m_lastLocation = null;
         m_sensorsEnabled = false;
         m_gpsEnabled = false;
         for (Sensor sensor : m_lstSensors)

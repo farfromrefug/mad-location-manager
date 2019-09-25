@@ -7,5 +7,5 @@ import android.location.Location;
  */
 
 public interface LocationServiceInterface {
-    void locationChanged(Location location);
+    void locationChanged(Location location, float originalSpeed);
 }
