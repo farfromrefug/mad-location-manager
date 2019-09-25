@@ -2,6 +2,7 @@
     <string name="app_name">SensorDataCollector</string>
     <!-- Main Activity -->
     <string name="status">Status</string>
+    <string name="speed">Speed</string>
     <string name="start_tracking">Start tracking</string>
     <string name="calibrate">Calibrate</string>
     <string name="distance">Distance:</string>
