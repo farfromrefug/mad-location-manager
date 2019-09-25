@@ -49,6 +49,12 @@ public class MapPresenter implements LocationListener {
         m_geoHashRTFilter.filter(loc);
     }
 
+    public void courseChanged(float bearing, CameraPosition currentCameraPosition) {
+        CameraPosition.Builder position = new CameraPosition.Builder(currentCameraPosition)
+                .bearing(bearing);
+        mapInterface.moveCamera(position.build());
+    }
+
     public void getRoute() {
         List<LatLng> routGpsAsIs = new ArrayList<>(m_lstGpsCoordinates.size());
         List<LatLng> routeFilteredKalman = new ArrayList<>(m_lstKalmanFilteredCoordinates.size());
