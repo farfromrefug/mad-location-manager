@@ -326,7 +326,16 @@ public class MainActivity extends AppCompatActivity implements LocationServiceIn
     };
 
     @Override
-    public void locationChanged(Location location) {
+    public void locationChanged(Location location, float originalSpeed) {
+        TextView speedStatus = (TextView) findViewById(R.id.speedStatus);
+        TextView originalSpeedStatus = (TextView) findViewById(R.id.originalSpeedStatus);
+        speedStatus.setText(String.format(
+                "%.1f km/h",
+                location.getSpeed() * 3.6));
+        originalSpeedStatus.setText(String.format(
+                "%.1f km/h",
+                originalSpeed * 3.6));
+
         if (m_map != null && m_presenter != null) {
             if (!m_map.isMyLocationEnabled()) {
                 m_map.setMyLocationEnabled(true);
