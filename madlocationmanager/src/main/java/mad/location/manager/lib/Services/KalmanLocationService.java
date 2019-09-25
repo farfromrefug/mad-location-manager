@@ -592,7 +592,7 @@ public class KalmanLocationService extends Service
         if (m_settings.filterMockGpsCoordinates && loc.isFromMockProvider()) return;
 
         double x, y, xVel, yVel, posDev, course, speed;
-        long timeStamp;
+        long timeStamp = Utils.nano2milli(loc.getElapsedRealtimeNanos());
         speed = loc.getSpeed();
         course = azimut;
         x = loc.getLongitude();
@@ -600,7 +600,6 @@ public class KalmanLocationService extends Service
         xVel = speed * Math.cos(course);
         yVel = speed * Math.sin(course);
         posDev = loc.getAccuracy();
-        timeStamp = Utils.nano2milli(loc.getElapsedRealtimeNanos());
         //WARNING!!! here should be speed accuracy, but loc.hasSpeedAccuracy()
         // and loc.getSpeedAccuracyMetersPerSecond() requares API 26
         double velErr = loc.getAccuracy() * 0.1;
