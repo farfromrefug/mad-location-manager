@@ -37,6 +37,7 @@ import mad.location.manager.lib.Filters.GPSAccKalmanFilter;
 import mad.location.manager.lib.Interfaces.ILogger;
 import mad.location.manager.lib.Interfaces.LocationServiceInterface;
 import mad.location.manager.lib.Interfaces.LocationServiceStatusInterface;
+import mad.location.manager.lib.Interfaces.SensorInterface;
 import mad.location.manager.lib.Loggers.GeohashRTFilter;
 
 public class KalmanLocationService extends Service
@@ -87,6 +88,7 @@ public class KalmanLocationService extends Service
     //region Location service implementation. Maybe we need to move it to some abstract class?*/
     protected List<LocationServiceInterface> m_locationServiceInterfaces;
     protected List<LocationServiceStatusInterface> m_locationServiceStatusInterfaces;
+    protected List<SensorInterface> m_sensorInterfaces;
 
     protected Location m_lastLocation;
 
