@@ -74,12 +74,12 @@ public class GPSAccKalmanFilter {
         posSigma *= mPosFactor;
         velSigma *= mVelFactor;
 
-        Log.i(TAG, "rebuildR: { " +
-                "velSigma : " + velSigma +
-                ", posSigma : " + posSigma +
-                ", velFactor : " + mVelFactor +
-                ", posFactor :" + mPosFactor +
-                "}");
+//        Log.i(TAG, "rebuildR: { " +
+//                "velSigma : " + velSigma +
+//                ", posSigma : " + posSigma +
+//                ", velFactor : " + mVelFactor +
+//                ", posFactor :" + mPosFactor +
+//                "}");
         if (m_useGpsSpeed) {
             double R[] = {
                     posSigma, 0.0, 0.0, 0.0,

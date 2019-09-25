@@ -275,27 +275,27 @@ public class KalmanLocationService extends Service
         }
 
         private void handlePredict(SensorGpsDataItem sdi) {
-            log2File("%d%d KalmanPredict : accX=%f, accY=%f",
-                    Utils.LogMessageType.KALMAN_PREDICT.ordinal(),
-                    (long)sdi.getTimestamp(),
-                    sdi.getAbsEastAcc(),
-                    sdi.getAbsNorthAcc());
+//            log2File("%d%d KalmanPredict : accX=%f, accY=%f",
+//                    Utils.LogMessageType.KALMAN_PREDICT.ordinal(),
+//                    (long) sdi.getTimestamp(),
+//                    sdi.getAbsEastAcc(),
+//                    sdi.getAbsNorthAcc());
             m_kalmanFilter.predict(sdi.getTimestamp(), sdi.getAbsEastAcc(), sdi.getAbsNorthAcc());
         }
 
         private void handleUpdate(SensorGpsDataItem sdi) {
             double xVel = sdi.getSpeed() * Math.cos(sdi.getCourse());
             double yVel = sdi.getSpeed() * Math.sin(sdi.getCourse());
-            log2File("%d%d KalmanUpdate : pos lon=%f, lat=%f, xVel=%f, yVel=%f, posErr=%f, velErr=%f",
-                    Utils.LogMessageType.KALMAN_UPDATE.ordinal(),
-                    (long)sdi.getTimestamp(),
-                    sdi.getGpsLon(),
-                    sdi.getGpsLat(),
-                    xVel,
-                    yVel,
-                    sdi.getPosErr(),
-                    sdi.getVelErr()
-            );
+//            log2File("%d%d KalmanUpdate : pos lon=%f, lat=%f, xVel=%f, yVel=%f, posErr=%f, velErr=%f",
+//                    Utils.LogMessageType.KALMAN_UPDATE.ordinal(),
+//                    (long) sdi.getTimestamp(),
+//                    sdi.getGpsLon(),
+//                    sdi.getGpsLat(),
+//                    xVel,
+//                    yVel,
+//                    sdi.getPosErr(),
+//                    sdi.getVelErr()
+//            );
 
             m_kalmanFilter.update(
                     sdi.getTimestamp(),
@@ -535,10 +535,10 @@ public class KalmanLocationService extends Service
                 android.opengl.Matrix.multiplyMV(absAcceleration, 0, rotationMatrixInv,
                         0, linearAcceleration, 0);
 
-                String logStr = String.format("%d%d abs acc: %f %f %f",
-                        Utils.LogMessageType.ABS_ACC_DATA.ordinal(),
-                        nowMs, absAcceleration[east], absAcceleration[north], absAcceleration[up]);
-                log2File(logStr);
+//                String logStr = String.format("%d%d abs acc: %f %f %f",
+//                        Utils.LogMessageType.ABS_ACC_DATA.ordinal(),
+//                        nowMs, absAcceleration[east], absAcceleration[north], absAcceleration[up]);
+//                log2File(logStr);
 
                 if (m_kalmanFilter == null) {
                     break;
